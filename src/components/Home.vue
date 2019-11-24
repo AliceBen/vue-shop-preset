@@ -22,7 +22,7 @@
         >
           <el-submenu :index="item.id + ''" v-for="item in menuList" :key="item.id">
             <template slot="title">
-              <i class="el-icon-location"></i>
+              <i :class="item.icon"></i>
               <span slot="title" v-text="item.authName"></span>
             </template>
             <el-menu-item
@@ -52,12 +52,12 @@ export default {
       isCollapse: false, //导航栏显示
       menuList: [], //菜单栏列表
       iconObj: [
-          { key: 'iconfont  icon-user' }, 
-          { key: 'iconfont  icon-tijikongjian' }, 
-          { key: 'iconfont icon-shangpin' }, 
-          { key: 'iconfont icon-danju' },
-          { key: 'iconfont icon-baobiao' }
-          ]
+        'iconfont  icon-user',
+        'iconfont  icon-tijikongjian',
+        'iconfont icon-shangpin',
+        'iconfont icon-danju',
+        'iconfont icon-baobiao'
+      ]
     }
   },
   created() {
@@ -72,16 +72,15 @@ export default {
       } else {
         this.menuList = res.data
         for (const key in this.menuList) {
-            console.log(this.menuList[key]);
-            
-          for (const i in this.iconObj) {
-            // console.log(this.iconObj[i]);
 
-            this.menuList[key][icon] = this.iconObj[i];
+          for (const i in this.iconObj) {
+            if (key == i) {
+              this.menuList[key].icon = this.iconObj[i]
+            }
           }
         }
 
-      console.log(this.menuList)
+        console.log(this.menuList)
       }
     },
     // 退出
