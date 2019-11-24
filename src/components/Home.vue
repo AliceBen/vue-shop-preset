@@ -19,6 +19,7 @@
           :collapse="isCollapse"
           active-text-color="#ffd04b"
           unique-opened
+          router
         >
           <el-submenu :index="item.id + ''" v-for="item in menuList" :key="item.id">
             <template slot="title">
@@ -26,7 +27,7 @@
               <span slot="title" v-text="item.authName"></span>
             </template>
             <el-menu-item
-              :index="subItem.id + ''"
+              :index= "'/' + subItem.path"
               v-for="subItem in item.children"
               :key="subItem.id"
             >
