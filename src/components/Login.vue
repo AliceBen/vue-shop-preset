@@ -24,7 +24,7 @@
           ></el-input>
         </el-form-item>
         <el-form-item class="btns">
-          <el-button type="primary" @click="submitForm('loginFormRef')">提交</el-button>
+          <el-button type="primary" @click="submitForm('loginFormRef')">登录</el-button>
           <el-button @click="resetForm('loginFormRef')">重置</el-button>
         </el-form-item>
       </el-form>
