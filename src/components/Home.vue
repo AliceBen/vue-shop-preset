@@ -12,7 +12,7 @@
     <el-container>
       <el-aside :width="isCollapse?'64px':'201px'">
         <el-menu
-          default-active="1-4-1"
+          :default-active="acquire"
           class="el-menu-vertical-demo"
           @open="handleOpen"
           @close="handleClose"
@@ -21,6 +21,7 @@
           unique-opened
           router
         >
+
           <el-submenu :index="item.id + ''" v-for="item in menuList" :key="item.id">
             <template slot="title">
               <i :class="item.icon"></i>
@@ -30,6 +31,7 @@
               :index= "'/' + subItem.path"
               v-for="subItem in item.children"
               :key="subItem.id"
+              @click="gainPath"
             >
               <template slot="title">
                 <i class="el-icon-menu"></i>
@@ -58,13 +60,19 @@ export default {
         'iconfont icon-shangpin',
         'iconfont icon-danju',
         'iconfont icon-baobiao'
-      ]
+      ],
+      acquire:'',
     }
   },
   created() {
     this.getMenuList()
   },
   methods: {
+    // 获取路径设置导航高亮
+    gainPath(){
+      this.acquire = this.$route.path;  //获取当前路径
+      console.log(this.acquire);
+    },
     // 获取左侧菜单数据
     async getMenuList() {
       const { data: res } = await this.$http.get('menus')
