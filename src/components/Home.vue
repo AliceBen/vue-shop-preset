@@ -53,8 +53,8 @@ export default {
       isCollapse: false, //导航栏显示
       menuList: [], //菜单栏列表
       iconObj: [
-        'iconfont  icon-user',
-        'iconfont  icon-tijikongjian',
+        'iconfont icon-user',
+        'iconfont icon-tijikongjian',
         'iconfont icon-shangpin',
         'iconfont icon-danju',
         'iconfont icon-baobiao'
@@ -73,14 +73,12 @@ export default {
       } else {
         this.menuList = res.data
         for (const key in this.menuList) {
-
           for (const i in this.iconObj) {
             if (key == i) {
               this.menuList[key].icon = this.iconObj[i]
             }
           }
         }
-
         console.log(this.menuList)
       }
     },
