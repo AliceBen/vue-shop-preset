@@ -3,77 +3,165 @@
     <!-- 面包屑 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>活动管理</el-breadcrumb-item>
-      <el-breadcrumb-item>活动列表</el-breadcrumb-item>
-      <el-breadcrumb-item>活动详情</el-breadcrumb-item>
+      <el-breadcrumb-item>用户管理</el-breadcrumb-item>
+      <el-breadcrumb-item>用户列表</el-breadcrumb-item>
+      <!-- <el-breadcrumb-item>活动详情</el-breadcrumb-item> -->
     </el-breadcrumb>
     <!-- 卡片视图 -->
     <el-card class="box-card">
       <el-row :gutter="40">
         <el-col :span="10">
-          <el-input placeholder="请输入内容" v-model="input3" class="input-with-select">
-            <el-button slot="append" icon="el-icon-search"></el-button>
+          <el-input
+            @clear="getUserList()"
+            v-model="queryInfo.query"
+            clearable
+            placeholder="请输入内容"
+            class="input-with-select"
+          >
+            <el-button @click="getUserList()" slot="append" icon="el-icon-search"></el-button>
           </el-input>
         </el-col>
-        <el-col :span="4">
-            <el-button type="primary">主要按钮</el-button>
+        <el-col :span="4" style="float:right">
+          <el-button type="primary" @click="addUserBtn">添加用户</el-button>
         </el-col>
       </el-row>
-      <!-- <div style="margin-top: 15px;"></div> -->
-      
-      <el-table :data="tableData" border style="width: 100%;margin-top:30px;">
-        <el-table-column prop="date" label="日期" width="180"></el-table-column>
-        <el-table-column prop="name" label="姓名" width="180"></el-table-column>
-        <el-table-column prop="address" label="地址"></el-table-column>
+      <el-table :data="users" border style="width: 100%;margin-top:30px;">
+        <el-table-column type="index" label="#"></el-table-column>
+        <el-table-column prop="username" label="姓名" width="180"></el-table-column>
+        <el-table-column prop="email" label="邮箱" width="180"></el-table-column>
+        <el-table-column prop="mobile" label="电话"></el-table-column>
+        <el-table-column prop="role_name" label="身份"></el-table-column>
+        <el-table-column prop="mg_state" label="状态">
+          <template slot-scope="scope">
+            <el-switch
+              @change="userStateChange(scope.row)"
+              v-model="scope.row.mg_state"
+              active-color="#409eff"
+              inactive-color="#909399"
+            ></el-switch>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作">
+          <template slot-scope="scope">
+            <el-button type="primary" icon="el-icon-edit" size="mini"></el-button>
+            <el-button type="danger" icon="el-icon-share" size="mini"></el-button>
+            <el-tooltip class="item" effect="dark" content="分配角色" placement="top">
+              <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+            </el-tooltip>
+          </template>
+        </el-table-column>
       </el-table>
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :current-page="currentPage4"
-        :page-sizes="[100, 200, 300, 400]"
-        :page-size="100"
+        :current-page="queryInfo.pagenum"
+        :page-sizes="[1, 2, 3, 5]"
+        :page-size="queryInfo.pagesize"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="400"
+        :total="total"
       ></el-pagination>
     </el-card>
+    <!-- 添加用户 -->
+    <el-dialog title="新增用户" :visible.sync="dialogFormVisible">
+      <el-form hide-required-asterisk :model="addUser" :rules="addUserRules" >
+        <el-form-item prop="username" label="用户名" :label-width="formLabelWidth">
+          <el-input v-model="addUser.username" autocomplete="off" placeholder="请输入用户名"></el-input>
+        </el-form-item>
+        <el-form-item prop="password" label="密码" :label-width="formLabelWidth">
+          <el-input v-model="addUser.password" autocomplete="off" placeholder="请输入用户名"></el-input>
+        </el-form-item>
+        <el-form-item prop="email" label="邮箱" :label-width="formLabelWidth">
+          <el-input v-model="addUser.email" autocomplete="off" placeholder="请输入邮箱账号"></el-input>
+        </el-form-item>
+        <el-form-item prop="mobile" label="电话" :label-width="formLabelWidth">
+          <el-input v-model="addUser.mobile" autocomplete="off" placeholder="请输入电话号码"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
 export default {
   data() {
     return {
-      input3: '',
-      tableData: [
-        {
-          date: '2016-05-02',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          date: '2016-05-04',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1517 弄'
-        },
-        {
-          date: '2016-05-01',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1519 弄'
-        },
-        {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1516 弄'
-        }
-      ],
-      currentPage4: 4
+      users: [],
+      queryInfo: {
+        query: '',
+        pagenum: 1,
+        pagesize: 2
+      },
+      total: 0,
+      dialogFormVisible: false,
+      addUser: {
+        username: '',
+        email: '',
+        mobile: '',
+        role_name: '',
+        password: ''
+      },
+      formLabelWidth: '60px',
+      addUserRules: {
+        mobile: [
+          { required: true, message: '请输入手机号码', trigger: 'blur' }
+        ],
+        email: [
+          { required: true, message: '请输入邮箱账号', trigger: 'blur' }
+        ],
+        username: [
+          { required: true, message: '请输入用户名称', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '请输入手机号码', trigger: 'blur' }
+        ]
+      }
     }
   },
+  created() {
+    this.getUserList()
+  },
   methods: {
+    // 添加用户
+    addUserBtn() {
+      this.dialogFormVisible = true
+    },
+    // 改变状态
+    async userStateChange(userinfo) {
+      const { data: res } = await this.$http.put(
+        `users/${userinfo.id}/state/${userinfo.mg_state}`
+      )
+      if (res.meta.status !== 200) {
+        userinfo.mg_state = !userinfo.mg_state
+        return this.$message.error('更新用户状态失败')
+      } else {
+        this.$message.success('更新用户状态成功')
+      }
+    },
+    // 获取列表数据
+    async getUserList() {
+      const { data: res } = await this.$http.get('users', {
+        params: this.queryInfo
+      })
+      if (res.meta.status !== 200) {
+        return this.$message.error(res.meta.msg)
+      } else {
+        this.users = res.data.users
+        this.total = res.data.total
+        console.log(res.data)
+      }
+    },
     handleSizeChange(val) {
+      this.queryInfo.pagesize = val
+      this.getUserList()
       console.log(`每页 ${val} 条`)
     },
-    handleCurrentChange(val) {
-      console.log(`当前页: ${val}`)
+    handleCurrentChange(pagenum) {
+      this.queryInfo.pagenum = pagenum
+      this.getUserList()
+      console.log(`当前页: ${pagenum}`)
     }
   }
 }
@@ -89,11 +177,6 @@ export default {
 .text {
   font-size: 14px;
 }
-
-.item {
-  margin-bottom: 18px;
-}
-
 .clearfix:before,
 .clearfix:after {
   display: table;
@@ -105,5 +188,9 @@ export default {
 
 .box-card {
   width: 100%;
+}
+.el-pagination {
+  float: left;
+  margin: 20px;
 }
 </style>
