@@ -62,8 +62,8 @@
       ></el-pagination>
     </el-card>
     <!-- 添加用户 -->
-    <el-dialog title="新增用户" :visible.sync="dialogFormVisible">
-      <el-form hide-required-asterisk :model="addUser" :rules="addUserRules" >
+    <el-dialog @close="addDialogClosed" title="新增用户" :visible.sync="dialogFormVisible">
+      <el-form ref="addFormRef" :model="addUser" :rules="addUserRules">
         <el-form-item prop="username" label="用户名" :label-width="formLabelWidth">
           <el-input v-model="addUser.username" autocomplete="off" placeholder="请输入用户名"></el-input>
         </el-form-item>
@@ -79,12 +79,13 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+        <el-button type="primary" @click="addUserSubmit(addUserRules)">确 定</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
+import { async } from 'q'
 export default {
   data() {
     return {
@@ -103,14 +104,12 @@ export default {
         role_name: '',
         password: ''
       },
-      formLabelWidth: '60px',
+      formLabelWidth: '80px',
       addUserRules: {
         mobile: [
           { required: true, message: '请输入手机号码', trigger: 'blur' }
         ],
-        email: [
-          { required: true, message: '请输入邮箱账号', trigger: 'blur' }
-        ],
+        email: [{ required: true, message: '请输入邮箱账号', trigger: 'blur' }],
         username: [
           { required: true, message: '请输入用户名称', trigger: 'blur' }
         ],
@@ -124,9 +123,35 @@ export default {
     this.getUserList()
   },
   methods: {
-    // 添加用户
+    // 添加用户表单验证
+    addUserSubmit() {
+      this.$refs.addFormRef.validate(async valid => {
+        if (valid) {
+          const { data: res } = await this.$http.post('users', this.addUser)
+          if (res.meta.status !== 201) {
+            this.$message({
+              message: '用户创建失败',
+              type: 'error'
+            })
+          } else {
+            this.dialogFormVisible = false
+            this.$message({
+              message: '用户创建成功',
+              type: 'success'
+            })
+            console.log(res,'========');
+            
+          }
+        }
+      })
+    },
+    // 添加用户弹框
     addUserBtn() {
       this.dialogFormVisible = true
+    },
+    // 关闭添加对话框
+    addDialogClosed() {
+      this.$refs.addFormRef.resetFields()
     },
     // 改变状态
     async userStateChange(userinfo) {
