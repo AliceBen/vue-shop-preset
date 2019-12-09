@@ -43,7 +43,12 @@
         </el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
-            <el-button type="primary" icon="el-icon-edit" size="mini"></el-button>
+            <el-button
+              type="primary"
+              icon="el-icon-edit"
+              size="mini"
+              @click="editorClick(scope.row.id)"
+            ></el-button>
             <el-button type="danger" icon="el-icon-share" size="mini"></el-button>
             <el-tooltip class="item" effect="dark" content="分配角色" placement="top">
               <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
@@ -61,6 +66,24 @@
         :total="total"
       ></el-pagination>
     </el-card>
+    <!-- 编辑用户 -->
+    <el-dialog @close="editorDialogClosed" title="修改用户信息" :visible.sync="editorFormVisible">
+      <el-form ref="editorFrom" :model="editorFrom" :rules="addUserRules">
+        <el-form-item prop="username" label="用户名" :label-width="formLabelWidth">
+          <el-input v-model="editorFrom.username" autocomplete="off" disabled></el-input>
+        </el-form-item>
+        <el-form-item prop="email" label="邮箱" :label-width="formLabelWidth">
+          <el-input v-model="editorFrom.email" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item prop="mobile" label="手机" :label-width="formLabelWidth">
+          <el-input v-model="editorFrom.mobile" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="editorFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="editorSubmit">确 定</el-button>
+      </div>
+    </el-dialog>
     <!-- 添加用户 -->
     <el-dialog @close="addDialogClosed" title="新增用户" :visible.sync="dialogFormVisible">
       <el-form ref="addFormRef" :model="addUser" :rules="addUserRules">
@@ -97,6 +120,8 @@ export default {
       },
       total: 0,
       dialogFormVisible: false,
+      editorFormVisible: false,
+      editorFrom: {},
       addUser: {
         username: '',
         email: '',
@@ -123,6 +148,43 @@ export default {
     this.getUserList()
   },
   methods: {
+    // 编辑submit
+    editorSubmit() {
+      this.$refs.editorFrom.validate(async valid => {
+        if(valid) {
+          const { data : res} = await this.$http.put('users/' + this.editorFrom.id,{
+           email: this.editorFrom.email,mobile:this.editorFrom.mobile
+          })
+          if (res.meta.status !== 200) {
+            this.$message({
+              message: '用户编辑失败',
+              type: 'error'
+            })
+          } else {
+            this.editorFormVisible = false
+            this.getUserList()
+            this.$message({
+              message: '用户编辑成功',
+              type: 'success'
+            })
+          }
+        }
+      })
+      
+    },
+    // 编辑用户
+    async editorClick(id) {
+      this.editorFormVisible = true
+      const { data: res } = await this.$http.get('users/' + id)
+      if (res.meta.status !== 200) {
+        this.$message({
+          message: '查询用户信息失败',
+          type: 'error'
+        })
+      }
+      this.editorFrom = res.data
+      console.log(this.editorFrom, '====this.editorFrom')
+    },
     // 添加用户表单验证
     addUserSubmit() {
       this.$refs.addFormRef.validate(async valid => {
@@ -139,8 +201,7 @@ export default {
               message: '用户创建成功',
               type: 'success'
             })
-            console.log(res,'========');
-            
+            console.log(res, '========')
           }
         }
       })
@@ -149,9 +210,12 @@ export default {
     addUserBtn() {
       this.dialogFormVisible = true
     },
-    // 关闭添加对话框
+    // 关闭添加对话框回到初始状况
     addDialogClosed() {
       this.$refs.addFormRef.resetFields()
+    },
+    editorDialogClosed() {
+      this.$refs.editorFrom.resetFields()
     },
     // 改变状态
     async userStateChange(userinfo) {
