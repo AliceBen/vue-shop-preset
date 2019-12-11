@@ -49,7 +49,12 @@
               size="mini"
               @click="editorClick(scope.row.id)"
             ></el-button>
-            <el-button type="danger" icon="el-icon-share" size="mini"></el-button>
+            <el-button
+              type="danger"
+              icon="el-icon-delete"
+              size="mini"
+              @click="deleteUser(scope.row.id)"
+            ></el-button>
             <el-tooltip class="item" effect="dark" content="分配角色" placement="top">
               <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
             </el-tooltip>
@@ -99,6 +104,9 @@
         <el-form-item prop="mobile" label="电话" :label-width="formLabelWidth">
           <el-input v-model="addUser.mobile" autocomplete="off" placeholder="请输入电话号码"></el-input>
         </el-form-item>
+         <el-form-item prop="mobile" label="身份" :label-width="formLabelWidth">
+          <el-input v-model="addUser.role_name" autocomplete="off" placeholder="请输入用户身份"></el-input>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
@@ -127,7 +135,8 @@ export default {
         email: '',
         mobile: '',
         role_name: '',
-        password: ''
+        password: '',
+        role_name:''
       },
       formLabelWidth: '80px',
       addUserRules: {
@@ -148,13 +157,35 @@ export default {
     this.getUserList()
   },
   methods: {
+    // 删除用户
+    async deleteUser(id) {
+      console.log(id, '===========id')
+      const { data: res } = await this.$http.delete('users/' + id)
+      if (res.meta.status !== 200) {
+        this.$message({
+          message: '删除失败',
+          type: 'error'
+        })
+      } else {
+        this.$message({
+          message: '删除成功',
+          type: 'success'
+        })
+        this.getUserList();
+      }
+      // this.users.splice(1, id)
+    },
     // 编辑submit
     editorSubmit() {
       this.$refs.editorFrom.validate(async valid => {
-        if(valid) {
-          const { data : res} = await this.$http.put('users/' + this.editorFrom.id,{
-           email: this.editorFrom.email,mobile:this.editorFrom.mobile
-          })
+        if (valid) {
+          const { data: res } = await this.$http.put(
+            'users/' + this.editorFrom.id,
+            {
+              email: this.editorFrom.email,
+              mobile: this.editorFrom.mobile
+            }
+          )
           if (res.meta.status !== 200) {
             this.$message({
               message: '用户编辑失败',
@@ -170,7 +201,6 @@ export default {
           }
         }
       })
-      
     },
     // 编辑用户
     async editorClick(id) {
@@ -190,6 +220,7 @@ export default {
       this.$refs.addFormRef.validate(async valid => {
         if (valid) {
           const { data: res } = await this.$http.post('users', this.addUser)
+          console.log(this.addUser,'===============this.addUser');
           if (res.meta.status !== 201) {
             this.$message({
               message: '用户创建失败',
