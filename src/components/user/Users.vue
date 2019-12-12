@@ -136,7 +136,7 @@ export default {
         mobile: '',
         role_name: '',
         password: '',
-        role_name:''
+        role_name: ''
       },
       formLabelWidth: '80px',
       addUserRules: {
@@ -159,27 +159,26 @@ export default {
   methods: {
     // 删除用户
     async deleteUser(id) {
-      this.$confirm('确定要删除当前用户吗','提示',{
-        confirmButtonText:'确定',
-        cancelButtonText:'取消',
-        type:'warning'
+      await this.$confirm('确定要删除当前用户吗', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       }).then(() => {
-     const { data: res } = await this.$http.delete('users/' + id)
-      if (res.meta.status !== 200) {
-        this.$message({
-          message: '删除失败',
-          type: 'error'
-        })
-      } else {
-        this.$message({
-          message: '删除成功',
-          type: 'success'
-        })
-        this.getUserList();
-      }
+        const { data: res } = this.$http.delete('users/' + id)
+        if (res.meta.status !== 200) {
+          this.$message({
+            message: '删除失败',
+            type: 'error'
+          })
+        } else {
+          this.$message({
+            message: '删除成功',
+            type: 'success'
+          })
+          this.getUserList()
+        }
       })
 
- 
       // this.users.splice(1, id)
     },
     // 编辑submit
@@ -227,7 +226,7 @@ export default {
       this.$refs.addFormRef.validate(async valid => {
         if (valid) {
           const { data: res } = await this.$http.post('users', this.addUser)
-          console.log(this.addUser,'===============this.addUser');
+          console.log(this.addUser, '===============this.addUser')
           if (res.meta.status !== 201) {
             this.$message({
               message: '用户创建失败',
