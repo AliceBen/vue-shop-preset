@@ -104,7 +104,7 @@
         <el-form-item prop="mobile" label="电话" :label-width="formLabelWidth">
           <el-input v-model="addUser.mobile" autocomplete="off" placeholder="请输入电话号码"></el-input>
         </el-form-item>
-         <el-form-item prop="mobile" label="身份" :label-width="formLabelWidth">
+        <el-form-item prop="mobile" label="身份" :label-width="formLabelWidth">
           <el-input v-model="addUser.role_name" autocomplete="off" placeholder="请输入用户身份"></el-input>
         </el-form-item>
       </el-form>
@@ -159,8 +159,12 @@ export default {
   methods: {
     // 删除用户
     async deleteUser(id) {
-      console.log(id, '===========id')
-      const { data: res } = await this.$http.delete('users/' + id)
+      this.$confirm('确定要删除当前用户吗','提示',{
+        confirmButtonText:'确定',
+        cancelButtonText:'取消',
+        type:'warning'
+      }).then(() => {
+     const { data: res } = await this.$http.delete('users/' + id)
       if (res.meta.status !== 200) {
         this.$message({
           message: '删除失败',
@@ -173,6 +177,9 @@ export default {
         })
         this.getUserList();
       }
+      })
+
+ 
       // this.users.splice(1, id)
     },
     // 编辑submit
