@@ -34,7 +34,6 @@
               @click="gainPath"
             >
               <template slot="title">
-                <i class="el-icon-menu"></i>
                 <span slot="title" v-text="subItem.authName"></span>
               </template>
             </el-menu-item>
