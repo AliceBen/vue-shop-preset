@@ -7,7 +7,11 @@
     </el-breadcrumb>
     <!-- 角色列表 -->
     <el-card class="box-card">
-      <el-button style="float:left;margin-bottom: 20px;" type="primary">添加角色</el-button>
+      <el-button
+        @click="addRoles = true"
+        style="float:left;margin-bottom: 20px;"
+        type="primary"
+      >添加角色</el-button>
       <el-table border :data="rolelist" style="width: 100%">
         <el-table-column type="expand">
           <template slot-scope="scope">
@@ -94,6 +98,21 @@
         <el-button type="primary" @click="allotRights">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 添加角色 -->
+    <el-dialog :visible.sync="addRoles">
+      <el-form :model="addRolesForm">
+        <el-form-item label="角色名称" :label-width="formLabelWidth">
+          <el-input v-model="addRolesForm.roleName" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述" :label-width="formLabelWidth">
+          <el-input v-model="addRolesForm.roleDesc" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addRoles = false">取 消</el-button>
+        <el-button type="primary" @click="addRolesClick">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -110,13 +129,32 @@ export default {
         label: 'authName'
       },
       defKeys: [105], //回显已绑定的元素
-      roleId: ''
+      roleId: '',
+      addRoles: false,
+      addRolesForm: {
+        roleName: '',
+        roleDesc: ''
+      },
+      formLabelWidth: '70px'
     }
   },
   created() {
     this.getRolesList()
   },
   methods: {
+    // 添加角色
+    async addRolesClick() {
+      const { data: res } = await this.$http.post('roles', 
+      this.addRolesForm
+      )
+      if (res.meta.status !== 201) {
+        return this.$message.error('添加失败')
+      } else {
+        this.addRoles = false;
+        this.getRolesList();
+        return this.$message.success('添加成功')
+      }
+    },
     // 分配权限
     async allotRights() {
       const keys = [
