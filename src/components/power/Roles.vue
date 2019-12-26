@@ -64,7 +64,7 @@
               size="mini"
               icon="el-icon-edit"
               type="primary"
-              @click="handleEdit(scope.$index, scope.row)"
+              @click="handleEdit(scope.row.id)"
             >编辑</el-button>
             <el-button
               size="mini"
@@ -99,7 +99,7 @@
       </span>
     </el-dialog>
     <!-- 添加角色 -->
-    <el-dialog :visible.sync="addRoles">
+    <el-dialog title="添加角色" :visible.sync="addRoles">
       <el-form :model="addRolesForm">
         <el-form-item label="角色名称" :label-width="formLabelWidth">
           <el-input v-model="addRolesForm.roleName" autocomplete="off"></el-input>
@@ -114,18 +114,18 @@
       </div>
     </el-dialog>
     <!-- 编辑角色 -->
-    <el-dialog :visible.sync="editorRoles">
+    <el-dialog title="编辑角色" :visible.sync="editorRoles">
       <el-form :model="editorRolesForm">
         <el-form-item label="角色名称" :label-width="formLabelWidth">
-          <el-input autocomplete="off"></el-input>
+          <el-input v-model="editorRolesForm.roleName" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="角色描述" :label-width="formLabelWidth">
-          <el-input autocomplete="off"></el-input>
+          <el-input v-model="editorRolesForm.roleDesc" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="editorRoles = false">取 消</el-button>
-        <el-button type="primary" @click="addRolesClick">确 定</el-button>
+        <el-button type="primary" @click="editorRolesClick">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -151,9 +151,7 @@ export default {
         roleName: '',
         roleDesc: ''
       },
-      editorRolesForm:{
-
-      },
+      editorRolesForm: {},
       formLabelWidth: '70px'
     }
   },
@@ -161,6 +159,10 @@ export default {
     this.getRolesList()
   },
   methods: {
+    // 编辑角色
+    editorRolesClick(){
+      
+    },
     // 添加角色
     async addRolesClick() {
       const { data: res } = await this.$http.post('roles', this.addRolesForm)
@@ -232,8 +234,16 @@ export default {
         // console.log(res.data, '==============res.data')
       }
     },
-    handleEdit(index, row) {
-      ;(this.editorRoles = true), console.log(index, row)
+    async handleEdit(id) {
+      this.editorRoles = true
+      const { data: res } = await this.$http.get('roles/' + id)
+      if (res.meta.status !== 200) {
+         this.$message({
+          type: 'error'
+        })
+      }else{
+        this.editorRolesForm = res.data
+      }
     },
     async handleDelete(index, row) {
       const { data: res } = await this.$http.delete('roles/' + row.id)
