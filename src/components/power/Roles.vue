@@ -113,6 +113,21 @@
         <el-button type="primary" @click="addRolesClick">确 定</el-button>
       </div>
     </el-dialog>
+    <!-- 编辑角色 -->
+    <el-dialog :visible.sync="editorRoles">
+      <el-form :model="editorRolesForm">
+        <el-form-item label="角色名称" :label-width="formLabelWidth">
+          <el-input autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述" :label-width="formLabelWidth">
+          <el-input autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="editorRoles = false">取 消</el-button>
+        <el-button type="primary" @click="addRolesClick">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -122,6 +137,7 @@ export default {
     return {
       rolelist: [],
       dialogVisible: false, //分配权限弹框
+      editorRoles: false, //编辑角色弹框
       roleData: [],
       // 树形控件属性绑定对象
       defaultProps: {
@@ -135,6 +151,9 @@ export default {
         roleName: '',
         roleDesc: ''
       },
+      editorRolesForm:{
+
+      },
       formLabelWidth: '70px'
     }
   },
@@ -144,14 +163,12 @@ export default {
   methods: {
     // 添加角色
     async addRolesClick() {
-      const { data: res } = await this.$http.post('roles', 
-      this.addRolesForm
-      )
+      const { data: res } = await this.$http.post('roles', this.addRolesForm)
       if (res.meta.status !== 201) {
         return this.$message.error('添加失败')
       } else {
-        this.addRoles = false;
-        this.getRolesList();
+        this.addRoles = false
+        this.getRolesList()
         return this.$message.success('添加成功')
       }
     },
@@ -216,7 +233,7 @@ export default {
       }
     },
     handleEdit(index, row) {
-      console.log(index, row)
+      ;(this.editorRoles = true), console.log(index, row)
     },
     async handleDelete(index, row) {
       const { data: res } = await this.$http.delete('roles/' + row.id)
