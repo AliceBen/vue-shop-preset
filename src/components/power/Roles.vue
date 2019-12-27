@@ -115,11 +115,11 @@
     </el-dialog>
     <!-- 编辑角色 -->
     <el-dialog title="编辑角色" :visible.sync="editorRoles">
-      <el-form :model="editorRolesForm">
-        <el-form-item label="角色名称" :label-width="formLabelWidth">
+      <el-form ref="editorFormRef" :model="editorRolesForm" :rules="editorRoleRules">
+        <el-form-item prop="roleName" label="角色名称" :label-width="formLabelWidth">
           <el-input v-model="editorRolesForm.roleName" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="角色描述" :label-width="formLabelWidth">
+        <el-form-item prop="roleDesc" label="角色描述" :label-width="formLabelWidth">
           <el-input v-model="editorRolesForm.roleDesc" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
@@ -132,6 +132,7 @@
 </template>
 
 <script>
+import { async } from 'q'
 export default {
   data() {
     return {
@@ -152,16 +153,44 @@ export default {
         roleDesc: ''
       },
       editorRolesForm: {},
-      formLabelWidth: '70px'
+      formLabelWidth: '70px',
+      editorRoleRules: {
+        roleName: [
+          { required: true, message: '请输入角色名称', trigger: 'blur' }
+        ],
+        roleDesc: [
+          { required: true, message: '请输入角色描述', trigger: 'blur' }
+        ]
+      }
     }
   },
   created() {
     this.getRolesList()
   },
   methods: {
-    // 编辑角色
-    editorRolesClick(){
-      
+    // 编辑角色submit
+    editorRolesClick() {
+      this.$refs.editorFormRef.validate(async valid => {
+        if (valid) {
+          await this.$http.put('roles/', this.editorFormRef.id, {
+            roleName: this.editorFormRef.roleName,
+            roleDesc: this.editorFormRef.roleDesc
+          })
+          if (res.meta.status !== 200) {
+            this.$message({
+              message: '编辑角色失败',
+              type: 'error'
+            })
+          }else{
+            this.$message({
+              message: '编辑用户成功',
+              type: 'success'
+            })
+            this.editorRoles = false
+            this.getRolesList();
+          }
+        }
+      })
     },
     // 添加角色
     async addRolesClick() {
@@ -238,10 +267,10 @@ export default {
       this.editorRoles = true
       const { data: res } = await this.$http.get('roles/' + id)
       if (res.meta.status !== 200) {
-         this.$message({
+        this.$message({
           type: 'error'
         })
-      }else{
+      } else {
         this.editorRolesForm = res.data
       }
     },
